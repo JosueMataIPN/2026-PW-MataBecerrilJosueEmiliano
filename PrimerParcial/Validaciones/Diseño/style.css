@@ -1,0 +1,62 @@
+* {
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    color: #244c85;
+    background-color: tomato;
+}
+
+header{
+    background-color: #244c85;
+    color: aliceblue;
+    padding: 1rem;
+    text-align: center;
+}
+
+hedear a{
+    color:#ffffff;
+}
+
+main{
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+footer{
+    text-align: center;
+    padding: 1rem;
+    color: aqua;
+    font-size: 0.875rem;
+}
+
+/*Catalogo de Talleres*/
+
+.catalogo{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.tarjeta{
+    background-color: aliceblue;
+    border:1px solid #244c85;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.tarjeta h2{
+    margin-top:0 ;
+    font-size: 1.1rem;
+}
+
+.tarjeta a{
+    text-decoration: none;
+}
+
+.tarjeta a:hover {
+    text-decoration: underline;
+}
