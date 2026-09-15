@@ -1,0 +1,34 @@
+body{
+    margin: 0;
+    background-color: #3E2C23;
+    color: #EDE0D4;
+    font-family:'Times New Roman', Times, serif;
+}
+
+.tables{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.content{
+    margin: 0 auto;
+}
+
+.titulocontent{ 
+    border-radius: 20px;
+    background-color: #6F4E37;
+    padding: 1rem;
+}
+
+p{
+    font-size: large;
+}
+
+h1{
+    text-align: center;
+}
+
+td a {
+    color: #C9A27E;
+}

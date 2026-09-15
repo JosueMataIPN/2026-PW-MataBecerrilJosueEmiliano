@@ -6,7 +6,7 @@ body{
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
     color: #244c85;
-    background-color: tomato;
+    background-color: #CDDFFD;
 }
 
 header{
@@ -29,7 +29,7 @@ main{
 footer{
     text-align: center;
     padding: 1rem;
-    color: aqua;
+    color: #0A59DA;
     font-size: 0.875rem;
 }
 
