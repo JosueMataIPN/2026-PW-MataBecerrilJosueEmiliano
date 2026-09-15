@@ -8,9 +8,9 @@ Las expresiones regulares, son patrones que nos ayudan a validar cadenas bajo ci
  */
 
 const patrones = {
-    nombre : /^[A-Za-zÁÉÍÓÚÑáéíóú\s]{2,60}$/ ,
+    nombre : /^[A-Za-zÁÉÍÓÚÑñáéíóú\s]{2,60}$/ ,
     boleta : /^\d{10}$/ ,
-    fecha : /^(0[1-9] | [12]\d | 3[01])\/(0[1-9] | 1[0-2])\/\d{4}$/
+    fecha : /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
 }
 
 const mensajes = {
@@ -25,19 +25,20 @@ function validarCampo(campo, valor){
 //para validar el formulario debemos ocupar los principios de obtención y manipulación de los elementos del DOM
 
 if (typeof document !== 'undefined'){
-    document.getElementById('submit');
+    
+    const formulario = document.getElementById('form-registro');
 
-    formulario.addEventListener('submit', (evento)
-=> {
+    formulario.addEventListener('submit', (evento) => {
     evento.preventDefault();
 
     let formularioValido = true;
+    
     for(const campo of Object.keys(patrones)){
         const input = document.getElementById(campo);
-        const errorSpan = documet.getElementById('error-${campo}');
+        const errorSpan = document.getElementById(`error-${campo}`);
         const esValido = validarCampo(campo, input.value);
         input.classList.toggle('invalido',!esValido);
-        spanError.textContent = esValido ? '' : mensajes[campo];
+        errorSpan.textContent = esValido ? '' : mensajes[campo];
         if(!esValido) formularioValido = false;
     }
 

@@ -16,7 +16,7 @@ header{
     text-align: center;
 }
 
-hedear a{
+header a{
     color:#ffffff;
 }
 
@@ -59,4 +59,43 @@ footer{
 
 .tarjeta a:hover {
     text-decoration: underline;
+}
+
+/*Forms*/
+.formulario-registro h1{
+    text-align: center;
+}
+
+form{
+   background-color: aliceblue;
+    border:1px solid #244c85;
+    border-radius: 0.5rem;
+    padding: 1rem;;
+}
+
+button{
+    background-color: #294F85;
+    color: white;
+    border-radius: 20px;
+    border: 2px solid #1D3A63;
+    padding: 1rem;
+    margin: 20px auto 0;
+}
+
+button:hover{
+    color: #FFA800;
+}
+
+input{
+    background-color: #B3EBF2;
+    text-align: center;
+    border: 2px solid #1D3A63;
+}
+
+form:has(input:invalid) button {
+    background-color: #DC143C;
+}
+
+form:not(:has(input:invalid)) button {
+    background-color: #4B5320;
 }

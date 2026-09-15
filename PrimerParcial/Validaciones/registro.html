@@ -13,19 +13,23 @@
   <form class="formulario-registro" id="form-registro" novalidate>
     <h1>Registrar Asistencias</h1>
     <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" name="nombre" required>
+    <input type="text" id="nombre" name="nombre" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ]+">
     <span class="error" id="error-nombre"></span>
+    <br>
 
     <label for="boleta">Numero de boleta:</label>
-    <input type="text" id="boleta" name="boleta" required>
+    <input type="text" id="boleta" name="boleta" required pattern="[0-9]{10}">
     <span class="error" id="error-boleta"></span>
+    <br>
 
     <label for="fecha">Fecha de registro (DD/MM/AAAA)</label>
-    <input type="text" id="fecha" name="fecha" placeholder="DD/MM/AAAA" required>
+    <input type="text" id="fecha" name="fecha" placeholder="DD/MM/AAAA" required pattern="(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}">
     <span class="error" id="error-fecha"></span>
-    
+    <br>
+
     <button type="submit">Registrar</button>
     <p class="mensaje-exito" id="mensaje-exito" > </p>
+    <br>
   </form>
 </main>
 <script src="./js/validaciones.js"></script>
