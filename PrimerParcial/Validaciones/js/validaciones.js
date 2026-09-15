@@ -22,3 +22,26 @@ const mensajes = {
 function validarCampo(campo, valor){
     return patrones[campo].test(valor.trim())
 }
+//para validar el formulario debemos ocupar los principios de obtención y manipulación de los elementos del DOM
+
+if (typeof document !== 'undefined'){
+    document.getElementById('submit');
+
+    formulario.addEventListener('submit', (evento)
+=> {
+    evento.preventDefault();
+
+    let formularioValido = true;
+    for(const campo of Object.keys(patrones)){
+        const input = document.getElementById(campo);
+        const errorSpan = documet.getElementById('error-${campo}');
+        const esValido = validarCampo(campo, input.value);
+        input.classList.toggle('invalido',!esValido);
+        spanError.textContent = esValido ? '' : mensajes[campo];
+        if(!esValido) formularioValido = false;
+    }
+
+    const mensajeExito = document.getElementById('mensaje-exito');
+    mensajeExito.textContent = formularioValido ? 'Registro exitoso!' : '';
+    })
+}
