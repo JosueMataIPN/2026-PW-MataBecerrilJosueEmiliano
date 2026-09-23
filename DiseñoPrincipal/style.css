@@ -1,7 +1,16 @@
+/* 
+#0B1020 Azul noche para fondos principales
+#1E3A5F Azul profundo para secciones, tarjetas, titulos y esas cosas
+#7BA7D9 Azul lunar para detalles, botones o enlaces secundarios
+#F2F4F8 Blanco lunar para texto principal
+#F26A21  Naranja energético para botones principales y elementos destacados como enlaces importantes
+*/
+
+
 body{
     margin: 0;
-    background-color: #3E2C23;
-    color: #EDE0D4;
+    background-color: #0B1020;
+    color: #F2F4F8;
     font-family:'Times New Roman', Times, serif;
 }
 
@@ -17,7 +26,7 @@ body{
 
 .titulocontent{ 
     border-radius: 20px;
-    background-color: #6F4E37;
+    background-color: #1E3A5F;
     padding: 1rem;
 }
 
@@ -30,5 +39,5 @@ h1{
 }
 
 td a {
-    color: #C9A27E;
+    color: #F26A21;
 }

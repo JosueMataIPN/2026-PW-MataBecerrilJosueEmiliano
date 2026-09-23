@@ -5,19 +5,19 @@
 body{
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
-    color: #244c85;
-    background-color: #CDDFFD;
+    color: #1E3A5F;
+    background-color: #0B1020;
 }
 
 header{
-    background-color: #244c85;
-    color: aliceblue;
+    background-color: #1E3A5F;
+    color: #F2F4F8;
     padding: 1rem;
     text-align: center;
 }
 
 header a{
-    color:#ffffff;
+    color: #F2F4F8;
 }
 
 main{
@@ -29,8 +29,21 @@ main{
 footer{
     text-align: center;
     padding: 1rem;
-    color: #0A59DA;
+    color: #7BA7D9;
     font-size: 0.875rem;
+}
+
+/*Detalle de Talleres*/
+section.info_taller{
+    color: #F2F4F8;
+}
+
+section.info_taller a{
+    color: #7BA7D9;
+}
+
+section.bitacora{
+    color: #F2F4F8;
 }
 
 /*Catalogo de Talleres*/
@@ -42,8 +55,8 @@ footer{
 }
 
 .tarjeta{
-    background-color: aliceblue;
-    border:1px solid #244c85;
+    background-color: #F2F4F8;
+    border:1px solid #1E3A5F;
     border-radius: 0.5rem;
     padding: 1rem;
 }
@@ -67,29 +80,29 @@ footer{
 }
 
 form{
-   background-color: aliceblue;
-    border:1px solid #244c85;
+   background-color: #F2F4F8;
+    border:1px solid #1E3A5F;
     border-radius: 0.5rem;
     padding: 1rem;;
 }
 
 button{
-    background-color: #294F85;
-    color: white;
+    background-color: #1E3A5F;
+    color: #F2F4F8;
     border-radius: 20px;
-    border: 2px solid #1D3A63;
+    border: 2px solid #7BA7D9;
     padding: 1rem;
     margin: 20px auto 0;
 }
 
 button:hover{
-    color: #FFA800;
+    color: #F26A21;
 }
 
 input{
-    background-color: #B3EBF2;
+    background-color: #7BA7D9;
     text-align: center;
-    border: 2px solid #1D3A63;
+    border: 2px solid #1E3A5F;
 }
 
 form:has(input:invalid) button {
