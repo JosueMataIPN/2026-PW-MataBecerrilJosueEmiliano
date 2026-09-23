@@ -41,3 +41,19 @@ h1{
 td a {
     color: #F26A21;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #0B1020;
+    color: #F2F4F8;
+    border: 1px solid #7BA7D9;
+}
+
+td {
+    padding: 0.75rem;
+    border: 1px solid #7BA7D9;
+}

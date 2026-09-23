@@ -26,6 +26,10 @@ main{
     padding: 1rem;
 }
 
+footer a{
+    color: #F26A21;
+}
+
 footer{
     text-align: center;
     padding: 1rem;
