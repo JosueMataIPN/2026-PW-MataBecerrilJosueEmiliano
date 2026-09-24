@@ -72,7 +72,20 @@
                     <label for="obj-inscritos">Nombre</label>
                     <input type="number" name="obj-inscritos" id="obj-inscritos" value="25" min="0">
                 </div>
+
+                <div class="campo">
+                    <label for="operacion-objeto">Tipo de operación</label>
+                    <select name="operacion-objeto" id="operacion-objeto">
+                        <option value="keys">Object.keys</option>
+                        <option value="values">Object.values</option>
+                        <option value="entries">Object.entries</option>
+                        <option value="stringify">JSON a Cadena</option>
+                        <option value="roundtrip">Ida y Vuelta(JSON a Cadena)</option>
+                    </select>
+                </div>
+                <button type="subject">Ejecutar opción</button>
             </form>
+            <output class="Resultado" id="resultado-objeto" for="form-objeto"></output>
         </section>
 
         <footer>
