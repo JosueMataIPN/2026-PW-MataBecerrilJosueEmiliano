@@ -60,3 +60,20 @@ formArreglos.addEventListener('submit', (evento) =>{
     resultadoArreglos.textContent = resultado;
 });
 pintarTabla();
+
+//segunda parte
+
+const formObjeto = document.getElementById('form-Objeto');
+const resultadoObjeto = document.getElementById('resultado-objeto');
+
+formObjeto.addEventListener('submit', (evento) =>{
+    evento.preventDefault();
+
+    //construimos el objeto de talleres
+    const taller ={
+        nombre: document.getElementById('objt-nombre').value,
+        instructor: document.getElementById('obj-instructor').value,
+        cupo: Number(document.getElementById('obj-cupo').value),
+        inscritos: Number(document.getElementById('obj-inscritos').value)
+    }
+})
