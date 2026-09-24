@@ -21,7 +21,7 @@ function pintarTabla(){
             <td>${taller.cupo}</td>
             <td>${taller.inscritos}</td>
         `;
-        tbody.appendChild(fila); 
+        tbody.appendChild(tfila); 
     });
     
 }
