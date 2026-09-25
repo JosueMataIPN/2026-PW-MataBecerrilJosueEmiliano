@@ -63,19 +63,19 @@ pintarTabla();
 
 //segunda parte
 
-const formObjeto = document.getElementById('form-Objeto');
+
+const formObjeto = document.getElementById('form-objeto');
 const resultadoObjeto = document.getElementById('resultado-objeto');
 
 formObjeto.addEventListener('submit', (evento) =>{
     evento.preventDefault();
 
-    //construimos el objeto de talleres
-    const taller ={
-        nombre: document.getElementById('objt-nombre').value,
-        instructor: document.getElementById('obj-instructor').value,
+    const taller= {
+        nombre: document.getElementById('obj-nombre').value,
+        instructor : document.getElementById('obj-instructor').value,
         cupo: Number(document.getElementById('obj-cupo').value),
-        inscritos: Number(document.getElementById('obj-inscritos').value)
-    }
+        inscritos : Number(document.getElementById('obj-inscritos').value)
+    };
 
     const operacion = document.getElementById('operacion-objeto').value;
 
@@ -86,15 +86,26 @@ formObjeto.addEventListener('submit', (evento) =>{
             resultado = JSON.stringify(Object.keys(taller));
             break;
         case 'values':
-            resultao = JSON.stringify(Object.values(taller));
+            resultado = JSON.stringify(Object.values(taller));
             break;
         case 'entries':
+            resultado = Object.entries(taller).map(([campo,valor]) => `${campo}: ${valor}`).join('\n');
             break;
         case 'stringify':
+            resultado = JSON.stringify(taller, null, 2);
             break;
         case 'roundtrip':
+            const textoJson = JSON.stringify(taller, null, 2);
+            const objetoDeVuelta = JSON.parse(textoJson);
+
+            resultado = [
+                '',
+                textoJson,
+                '',
+                `tipo: ${typeof objetoDeVuelta}`,
+                objetoDeVuelta.nombre
+            ].join('\n');
             break;
     }
-
     resultadoObjeto.textContent = resultado;
 })
