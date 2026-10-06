@@ -84,6 +84,27 @@
         </form>
             <output class="Resultado" id="resultado-objeto" for="form-objeto"></output>
         </section>
+        <section class="ejericio" aria-labelledby="titulo-texto">
+            <h2 id="titulo-texto">3.- Strings y fechas</h2>
+            <p>La fecha usa el mismo formato <strong>DD/MM/AAAA</strong> valido con regex</p>
+            <form id="form-text" class="formulario">
+                <div class="campo">
+                    <label for="nombre-texto"> Nombre (con espacios de sobre a proposito)</label>
+                    <input type="text" id="nombre-texto" name="nombre-texto" value="Maria Lopez  ">
+                </div>
+                <div class="campo">
+                    <label for="cupo-texto"> Cupo (para el template)</label>
+                    <input type="number" id="cupo-texto" name="cupo-texto" value="25" min="0">
+                </div>
+                <div class="campo">
+                    <label for="fecha-texto"> Fecha de asistencia (DD/MM/AAAA)</label>
+                    <input type="text" id="fecha-texto" name="fecha-texto" value="05/09/2026" placeholder="05/09/2026">
+                    <span class="error" id="error-fecha"></span>
+                </div>
+                <button type="submit">Ejecutar</button>
+            </form>
+            <output class="resultado" id="resultado-texto" for="form-texto"></output>
+        </section>
         <section class="video-gatito">
             <h2>Video del gatito bailando</h2>
             <div class="caja-video">
