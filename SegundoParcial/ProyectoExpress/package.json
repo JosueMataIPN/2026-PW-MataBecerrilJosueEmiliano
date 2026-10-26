@@ -1,16 +1,15 @@
 {
-  "name": "proyectoexpress",
+  "name": "backend-memoria",
   "version": "1.0.0",
-  "description": "Este es un ejemplo de express",
-  "license": "ISC",
-  "author": "JosueMataIPN",
-  "type": "commonjs",
-  "main": "index.js",
+  "description": "Backend de práctica del proyecto CECyT9 (semana 9, actividad autónoma): mismas rutas que backend-proyecto, datos en memoria",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "express": "^5.3.0"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
