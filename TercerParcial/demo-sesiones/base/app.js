@@ -8,6 +8,68 @@ const { crearModeloUsuarios } = require('./modelos/usuarios.modelo');
 
 const NOMBRE_COOKIE = 'connect.sid';
 
+//Si hay una sesion preexistente obtenerla del almacen sino crearla
+function todasLasSesiones(almacen){
+  return new Promise((resolve,reject)=>{
+    const promesa = almacen.all((error, sesiones) => (error ? reject(error) : resolve(sesiones)));
+    if (promesa && typeof promesa.then === 'function') promesa.then(resolve, reject);
+  }); 
+}
+
+function crearApp(config, pool){
+  const app = express();
+  app.use(express.json());
+  //primero debemos de obtener el modelo de la bd
+  const usuarios = crearModeloUsuarios(pool);
+
+  //Aqui nosotros debemos de identificar la sesión sera por tabla en bd, o la sesión sera una cookie en memoria del navegador, o es una mezcla, sesion en memoria de servidor y por tabla en bd y cookie en navegador y bd
+  const almacen = config.almacen === 'memoria' ? new session.MemoryStore() : new MySQLStore({createDatabaseTable: false, clearExpired: false}, pool);
+  app.locals.almacen = almacen;
+}
+
+app.use(
+  session({
+    name : NOMBRE_COOKIE,
+    secret : process.env.SESSION_SECRET || 'secreto-solo.para-la-demo',
+    store : almacen,
+    resave : false,
+    //No se crea la sesion ni la cookie
+    saveUninitialized : false,
+    rolling : config.rolling || false,
+    cookie :{
+      maxAge : config.maxAge || 1000 * 60 * 60 * 24,
+      httpOnly : config.httpOnly || true,
+      sameSite : config.sameSite || 'lax',
+      secure : config.secure || false, //Cuando este en servidor se pone en true
+    },
+  })
+)
+
+//Necesitamos visualizar el id de la sesion para compararla en la pantalla.
+const cortoId = (id) => (id ? `${id.slice(0,8)}...` : null);
+
+//nosotros estamos ocupando un middleware, el cual es el que se encarga de comunicar el back y el front, para ellos nosotros debemos de obtener la sesión a partir de express, pero en cada patición debemos de devolver la sesión, para ello el atributo rolling, la extiende y aunque le hayamos dado false, no se puede confiar en que la expire, para ello debemos de identificarla y validarla en sus diferentes momentos
+
+function vencida (sesion){
+  const desde = config.rolling ? sesion.ultimoUso : sesion.creada;
+  return Date.now() - desde > config.maxAge;
+}
+
+function requiereSesion(req, res, next){
+  if(req.session.usuario && vencida(req.session)){
+    return req.session.destroy(()=>{
+      res.clearCookie(NOMBRE_COOKIE);
+      res.status(401).json({error: '401 Tu sesion ya expiro, vuelve a iniciar sesion'});
+    });
+  }
+  if(!req.session.usuario){
+    return res.status(401).json({error: '401 No has iniciado sesion con la cuenta correcta.'})
+  }
+  req.session.ultimoUso = Date.now();
+  next();
+}
+
+
 
 
 /*
