@@ -25,45 +25,45 @@ function crearApp(config, pool){
   //Aqui nosotros debemos de identificar la sesión sera por tabla en bd, o la sesión sera una cookie en memoria del navegador, o es una mezcla, sesion en memoria de servidor y por tabla en bd y cookie en navegador y bd
   const almacen = config.almacen === 'memoria' ? new session.MemoryStore() : new MySQLStore({createDatabaseTable: false, clearExpired: false}, pool);
   app.locals.almacen = almacen;
-}
+
 
 app.use(
   session({
-    name : NOMBRE_COOKIE,
-    secret : process.env.SESSION_SECRET || 'secreto-solo.para-la-demo',
-    store : almacen,
-    resave : false,
-    //No se crea la sesion ni la cookie
-    saveUninitialized : false,
-    rolling : config.rolling || false,
-    cookie :{
-      maxAge : config.maxAge || 1000 * 60 * 60 * 24,
-      httpOnly : config.httpOnly || true,
-      sameSite : config.sameSite || 'lax',
-      secure : config.secure || false, //Cuando este en servidor se pone en true
+    name: NOMBRE_COOKIE,
+    secret: process.env.SESSION_SECRET || 'secreto-solo.para-la-demo',
+    store: almacen,
+    resave: false,
+    saveUninitialized: false,
+    rolling: config.rolling ?? false,
+
+    cookie: {
+      maxAge: config.maxAgeMs ?? 1000 * 60 * 60 * 24,
+      httpOnly: config.httpOnly ?? true,
+      sameSite: config.sameSite ?? 'lax',
+      secure: config.secure ?? false, //Se vuelve true cuando el servidor está activo
     },
   })
-)
+);
 
 //Necesitamos visualizar el id de la sesion para compararla en la pantalla.
 const cortoId = (id) => (id ? `${id.slice(0,8)}...` : null);
 
-//nosotros estamos ocupando un middleware, el cual es el que se encarga de comunicar el back y el front, para ellos nosotros debemos de obtener la sesión a partir de express, pero en cada patición debemos de devolver la sesión, para ello el atributo rolling, la extiende y aunque le hayamos dado false, no se puede confiar en que la expire, para ello debemos de identificarla y validarla en sus diferentes momentos
+//nosotros estamos ocupando un middleware, el cual es el que se encarga de comunicar el back y el front, para ellos nosotros debemos de obtener la sesión a partir de express, pero en cada petición debemos de devolver la sesión, para ello el atributo rolling, la extiende y aunque le hayamos dado false, no se puede confiar en que la expire, para ello debemos de identificarla y validarla en sus diferentes momentos
 
 function vencida (sesion){
   const desde = config.rolling ? sesion.ultimoUso : sesion.creada;
-  return Date.now() - desde > config.maxAge;
+  return Date.now() - desde > config.maxAgeMs;
 }
 
 function requiereSesion(req, res, next){
   if(req.session.usuario && vencida(req.session)){
     return req.session.destroy(()=>{
       res.clearCookie(NOMBRE_COOKIE);
-      res.status(401).json({error: '401 Tu sesion ya expiro, vuelve a iniciar sesion'});
+      res.status(401).json({error: '401 Tu sesión venció: vuelve a iniciar sesión.'});
     });
   }
   if(!req.session.usuario){
-    return res.status(401).json({error: '401 No has iniciado sesion con la cuenta correcta.'})
+    return res.status(401).json({error: '401 No has iniciado sesión (o tu sesión ya venció).'})
   }
   req.session.ultimoUso = Date.now();
   next();
@@ -72,33 +72,33 @@ function requiereSesion(req, res, next){
 function requiereRol(rol){
   return (req, res, next)=>{
     if(req.session.usuario.rol !== rol){
-      return res.status(403).json({error: `eres ${res.session.usuario.usuario}, pero esta ruta es para ${rol}`});
+      return res.status(403).json({error: `403 Eres ${req.session.usuario.usuario}, pero esta ruta es solo para ${rol}`});
     }
     next();
-  }
+  };
+ }
 
   //vamos a definir las rutas de acceso
-  app.get('/api/cpnfig', (req, res)=>{
+  app.get('/api/config', (req, res)=>{
     res.json(config);
   });
 
   //vamos a crear una ruta para un usuario visitante sin que inicie sesion
   app.post('/api/visita', (req, res) =>{
-    if(!req.session) return res.json({error: 'no tiene acceso'});
     req.session.visitas = (req.session.visitas || 0) + 1;
-    req.json({visitas : req.session.visitas, sesion: idCorto(req.sessionID)});
+    res.json({visitas : req.session.visitas, sesion: cortoId(req.sessionID)});
   });
 
   //Vamos a autenticarnos
   app.post('/api/login', async(req, res, next)=>{
     try{
       const{ usuario, contrasena} = req.body || {};
-      const datos = await usuario.verificar(usuario, contrasena);
+      const datos = await usuarios.verificar(usuario, contrasena);
       if(!datos) return res.status(401).json({
         error : 'Usuario o contraseña incorrectos'
       });
 
-      const antes = req.session.visitas !== undefined ? idCorto(req.sessionID) : null;
+      const antes = req.session.visitas !== undefined ? cortoId(req.sessionID) : null;
       const visitas = req.session.visitas || 0;
 
       //tenemos que guardar los datos de la sesion
@@ -109,7 +109,7 @@ function requiereRol(rol){
         req.session.ultimoUso = Date.now();
         req.session.save((error)=>{
           if (error) return next(error);
-          res.json({usuario: datos, sesionAntes: antes, sesionDespues: idCorto(req.sessionID)});
+          res.json({usuario: datos, sesionAntes: antes, sesionDespues: cortoId(req.sessionID)});
         });
       };
       
@@ -123,11 +123,11 @@ function requiereRol(rol){
     }
   });
 
-  app.post('/api/layout', (req, res, next) =>{
+  app.post('/api/logout', (req, res, next) =>{
     req.session.destroy((error)=>{
       if(error) return next(error);
       res.clearCookie(NOMBRE_COOKIE);
-      res.json({mensaje : 'Sesion cerrada'});
+      res.json({mensaje : 'Sesión cerrada: el servidor la borró'});
     });
   });
 
@@ -135,14 +135,20 @@ function requiereRol(rol){
     const desde = config.rolling ? req.session.ultimoUso : req.session.creada;
     res.json({
       usuario : req.session.usuario,
-      sesion : idCorto(req.sessionID),
-      expiraEnSegundos : Math.max(0, Math.round((desde + config.maxAge - Date.now())/10000)),
+      sesion : cortoId(req.sessionID),
+      expiraEnSegundos : Math.max(0, Math.round((desde + config.maxAgeMs - Date.now())/1000)),
     });
   });
 
   app.get('/api/perfil', requiereSesion, (req, res)=>{
     req.session.visitas = (req.session.visitas || 0) + 1;
-    res.json({mensaje: `Hola: ${req.session.usuario.nombre}, rol: ${req.session.usuario.rol}, visitas: ${req.session.visitas}`});
+    res.json({mensaje: `Hola: ${req.session.usuario.nombre}`, rol: req.session.usuario.rol, visitas: req.session.visitas});
+  });
+
+  app.get('/api/admin/reporte', requiereSesion, requiereRol('admin'), (req, res) => {
+  res.json({
+    reporte: 'Talleres: 3 · Inscritos: 57 · Cupo libre: 18'
+    });
   });
 
   //Vamos a desarrollar una prueba unitaria para verificar con verdadero o falso las pruebas ejecutadas
@@ -150,7 +156,7 @@ function requiereRol(rol){
     try{
       const sesiones = await todasLasSesiones(almacen);
       const lista = Object.entries(sesiones || {}).map(([id, s])=>({
-        sesion: idCorto(id),
+        sesion: cortoId(id),
         esLaTuya: id === req.sessionID,
         usuario: s.usuario ? s.usuario.usuario : 'Sin iniciar sesion',
         visitas: s.visitas || 0,
