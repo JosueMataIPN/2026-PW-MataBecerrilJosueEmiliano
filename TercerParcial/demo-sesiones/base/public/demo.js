@@ -1,99 +1,229 @@
 // La página solo hace fetch a la API. El navegador manda la cookie solo (misma página, mismo servidor).
+//Facilita el acceso a los elementos de la página para tener un un código más limpio y sin tantas repeticiones.
 const $ = (id) => document.getElementById(id);
 
+//Centraliza las peticiones al servidor para mantener un manejo de respuestas y cookies de sesión mejor.
+async function solicitarAPI(url, opciones = {}) {
+    const configuracion = {
+        method: opciones.method || 'GET',
+        headers: {},
+        credentials: 'same-origin'
+    };
 
-/*async function llamar(metodo, url, cuerpo) {
-  const opciones = { method: metodo, headers: {} };
-  if (cuerpo) {
-    opciones.headers['Content-Type'] = 'application/json';
-    opciones.body = JSON.stringify(cuerpo);
-  }
-  const respuesta = await fetch(url, opciones);
-  let datos = null;
-  try { datos = await respuesta.json(); } catch { datos = null; }
-  return { status: respuesta.status, datos };
-}
-
-function anotar(metodo, url, status, datos) {
-  const li = document.createElement('li');
-  const clase = status < 300 ? 'ok' : status === 401 ? 'e401' : status === 403 ? 'e403' : 'error';
-  li.innerHTML = `<span class="codigo ${clase}">${status}</span> <code>${metodo} ${url}</code>`;
-  const cuerpo = document.createElement('pre');
-  cuerpo.textContent = JSON.stringify(datos, null, 2);
-  li.appendChild(cuerpo);
-  $('bitacora').prepend(li);
-}
-
-async function refrescarEstado() {
-  const { status, datos } = await llamar('GET', '/api/sesion');
-  const estado = $('estado');
-  if (status === 200) {
-    estado.textContent = `${datos.usuario.nombre} · rol ${datos.usuario.rol} · sesión ${datos.sesion} · vence en ${datos.expiraEnSegundos} s`;
-    estado.className = 'estado con-sesion';
-  } else {
-    estado.textContent = 'Sin sesión (el servidor responde 401)';
-    estado.className = 'estado sin-sesion';
-  }
-  $('cookie-js').textContent = document.cookie || '(vacío)';
-}
-
-async function refrescarSesiones() {
-  const { datos: respuesta } = await llamar('GET', '/api/diagnostico/sesiones');
-  const datos = respuesta ? respuesta.sesiones : [];
-  if (respuesta) {
-    $('donde').textContent = respuesta.almacen === 'memoria'
-      ? 'En la MEMORIA del servidor: se borra al reiniciarlo.'
-      : 'En MySQL, tabla sessions. En Workbench: SELECT * FROM demo_sesiones.sessions;';
-  }
-  const cuerpo = $('tabla-sesiones');
-  cuerpo.innerHTML = '';
-  if (!datos || datos.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="4">(sin sesiones)</td></tr>';
-    return;
-  }
-  for (const s of datos) {
-    const fila = document.createElement('tr');
-    if (s.esLaTuya) fila.className = 'tuya';
-    const vence = s.expira ? new Date(s.expira).toLocaleTimeString() : '—';
-    for (const valor of [s.sesion + (s.esLaTuya ? ' (la tuya)' : ''), s.usuario, s.visitas, vence]) {
-      const celda = document.createElement('td');
-      celda.textContent = valor;
-      fila.appendChild(celda);
+    if (opciones.body !== undefined) {
+        configuracion.headers['Content-Type'] = 'application/json';
+        configuracion.body = JSON.stringify(opciones.body);
     }
-    cuerpo.appendChild(fila);
-  }
+
+    const respuesta = await fetch(url, configuracion);
+
+    let datos;
+    try {
+        datos = await respuesta.json();
+    } catch {
+        datos = null;
+    }
+
+    return {
+        status: respuesta.status,
+        datos: datos
+    };
 }
 
-async function refrescarTodo() {
-  await refrescarEstado();
-  await refrescarSesiones();
+// Permite llevar un registro visible de las peticiones para facilitar la revisión de errores durante las pruebas.
+function registrarBitacora(metodo, url, resultado) {
+    const bitacora = $('bitacora');
+
+    const elemento = document.createElement('li');
+
+    const codigo = document.createElement('span');
+    codigo.textContent = resultado.status;
+
+    if (resultado.status >= 200 && resultado.status < 300) {
+        codigo.className = 'codigo ok';
+    } else if (resultado.status === 401) {
+        codigo.className = 'codigo e401';
+    } else if (resultado.status === 403) {
+        codigo.className = 'codigo e403';
+    } else {
+        codigo.className = 'codigo error';
+    }
+
+    const detalle = document.createElement('span');
+    detalle.textContent = `${metodo} ${url}`;
+
+    const respuesta = document.createElement('pre');
+    respuesta.textContent = JSON.stringify(resultado.datos, null, 2);
+
+    elemento.appendChild(codigo);
+    elemento.appendChild(detalle);
+    elemento.appendChild(respuesta);
+
+    bitacora.prepend(elemento);
 }
 
-$('usuario').addEventListener('change', () => {
-  $('contrasena').value = `${$('usuario').value}12345`;
-});
+//Permite que el usuario conozca el estado de su autenticación y el tiempo que le queda a su sesión.
+async function actualizarEstadoSesion() {
 
-$('form-login').addEventListener('submit', async (evento) => {
-  evento.preventDefault();
-  const cuerpo = { usuario: $('usuario').value, contrasena: $('contrasena').value };
-  const { status, datos } = await llamar('POST', '/api/login', cuerpo);
-  anotar('POST', '/api/login', status, datos);
-  await refrescarTodo();
-});
+    const resultado = await solicitarAPI('/api/sesion');
 
-for (const boton of document.querySelectorAll('[data-url]')) {
-  boton.addEventListener('click', async () => {
-    const { metodo, url } = boton.dataset;
-    const { status, datos } = await llamar(metodo, url);
-    anotar(metodo, url, status, datos);
-    await refrescarTodo();
-  });
+    registrarBitacora('GET', '/api/sesion', resultado);
+
+    const estado = $('estado');
+
+    if (resultado.status === 200) {
+
+        const datos = resultado.datos;
+
+        estado.textContent =
+            `Sesión iniciada: ${datos.usuario.nombre} | ` +
+            `Rol: ${datos.usuario.rol} | ` +
+            `ID: ${datos.sesion} | ` +
+            `Expira en: ${datos.expiraEnSegundos} segundos`;
+
+        estado.className = 'con-sesion';
+
+    } else {
+
+        estado.textContent = 'No has iniciado sesión';
+        estado.className = 'sin-sesion';
+    }
+
+    $('cookie-js').textContent = document.cookie || 'No hay cookies visibles para JavaScript';
 }
 
-$('btn-refrescar').addEventListener('click', refrescarTodo);
-$('btn-sesiones').addEventListener('click', refrescarSesiones);
+//Permite ver las sesiones existentes y reconocer cual partenece al navegador actual.
+async function actualizarTablaSesiones() {
+    const resultado = await solicitarAPI('/api/diagnostico/sesiones');
 
-llamar('GET', '/api/config').then(({ datos }) => {
-  $('config').textContent = JSON.stringify(datos, null, 2);
-});
-refrescarTodo();*/
+    registrarBitacora('GET', '/api/diagnostico/sesiones', resultado);
+
+    const tabla = $('tabla-sesiones');
+
+    tabla.replaceChildren();
+
+    if (resultado.status !== 200) {
+        const fila = document.createElement('tr');
+        const celda = document.createElement('td');
+
+        celda.colSpan = 4;
+        celda.textContent = resultado.datos?.error || 'No se pudieron consultar las sesiones';
+
+        fila.appendChild(celda);
+        tabla.appendChild(fila);
+
+        return;
+    }
+
+    $('donde').textContent = `Almacenamiento de sesiones: ${resultado.datos.almacen}`;
+
+    if (resultado.datos.sesiones.length === 0) {
+        const fila = document.createElement('tr');
+        const celda = document.createElement('td');
+
+        celda.colSpan = 4;
+        celda.textContent = '(sin sesiones)';
+
+        fila.appendChild(celda);
+        tabla.appendChild(fila);
+
+        return;
+    }
+
+    resultado.datos.sesiones.forEach((sesion) => {
+        const fila = document.createElement('tr');
+
+        const valores = [
+            sesion.esLaTuya ? `${sesion.sesion} (la tuya)` : sesion.sesion,
+            sesion.usuario,
+            sesion.visitas,
+            new Date(sesion.expira).toLocaleString()
+        ];
+
+        valores.forEach((valor) => {
+            const celda = document.createElement('td');
+            celda.textContent = valor;
+            fila.appendChild(celda);
+        });
+
+        if (sesion.esLaTuya) {
+            fila.className = 'tuya';
+        }
+
+        tabla.appendChild(fila);
+    });
+}
+
+//Permite que el usuario interactue con la demostración mediante clicks en la página y que cada acción se comunique con el servidor.
+function conectarEventos() {
+    $('btn-refrescar').addEventListener('click', async () => {
+      await actualizarEstadoSesion();
+      await actualizarTablaSesiones();
+    });
+
+    $('btn-sesiones').addEventListener('click', actualizarTablaSesiones);
+
+    $('usuario').addEventListener('change', () => {
+    const contrasenas = {
+        ana: 'ana12345',
+        luis: 'luis12345',
+        admin: 'admin12345'
+    };
+
+      $('contrasena').value = contrasenas[$('usuario').value];
+    });
+
+    $('form-login').addEventListener('submit', async (evento) => {
+        evento.preventDefault();
+
+        const usuario = $('usuario').value;
+        const contrasena = $('contrasena').value;
+
+        const resultado = await solicitarAPI('/api/login', {
+            method: 'POST',
+            body: {
+                usuario: usuario,
+                contrasena: contrasena
+            }
+        });
+
+        registrarBitacora('POST', '/api/login', resultado);
+
+        $('contrasena').value = '';
+
+        await actualizarEstadoSesion();
+        await actualizarTablaSesiones();
+    });
+
+    document.querySelectorAll('button[data-metodo][data-url]').forEach((boton) => {
+        boton.addEventListener('click', async () => {
+            const metodo = boton.dataset.metodo;
+            const url = boton.dataset.url;
+
+            const resultado = await solicitarAPI(url, {
+                method: metodo
+            });
+
+            registrarBitacora(metodo, url, resultado);
+
+            await actualizarEstadoSesion();
+            await actualizarTablaSesiones();
+        });
+    });
+}
+
+//Garantiza que la demostración esté preparada desde el inicio mostrando la configuración y el estado actual de las sesiones.
+async function iniciarDemo() {
+    conectarEventos();
+
+    const resultado = await solicitarAPI('/api/config');
+
+    registrarBitacora('GET', '/api/config', resultado);
+
+    $('config').textContent = JSON.stringify(resultado.datos, null, 2);
+
+    await actualizarEstadoSesion();
+    await actualizarTablaSesiones();
+}
+
+iniciarDemo();
